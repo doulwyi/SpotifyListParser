@@ -33,7 +33,7 @@ def show_tracks(results, playlist):
 
 
 def show_youtube_url(track, playlist, artist):
-    full_search = track+ ' ' + artist
+    full_search = track+ ' ' + artist + ' ' + 'audio'
     print(full_search)
     query_string = urllib.parse.urlencode({"search_query": full_search})
     html_content = urllib.request.urlopen("http://www.youtube.com/results?" + query_string)
