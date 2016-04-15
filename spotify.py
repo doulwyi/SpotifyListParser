@@ -26,57 +26,64 @@ def show_tracks(results, playlist):
         track_name = track['name']
         artist = track['artists'][0]['name']
         show_youtube_url(track_name, playlist, artist)
-        print("%d %2.32s / %s" % (i, artist, track_name))
+        # print("%d %2.32s / %s" % (i, artist, track_name))
 
 
 def show_youtube_url(track, playlist, artist):
-    full_search = track + ' ' + artist + ' audio'
-    print(full_search)
-    query_string = urllib.parse.urlencode({"search_query": full_search})
-    # print(query_string)
-    html_content = urllib.request.urlopen("http://www.youtube.com/results?" + query_string)
-    # print(html_content)
-    search_results = re.findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
-    # print(search_results)
-    url = "http://www.youtube.com/watch?v=" + search_results[0]
-    # print(url)
-    download_audio_from_youtube(url, track, playlist, artist)
-    print("http://www.youtube.com/watch?v=" + search_results[0])
-
+    url_list = []
+    _track = track.split('-')
+    print('Track name: ' + _track[0])
+    print('Artist name: ' + artist)
+    full_search = _track[0] + ' ' + artist + ' audio'
+    print('Key words for search: ' + full_search)
+    query = urllib.parse.quote(full_search)
+    # print(query)
+    search_url = "https://www.youtube.com/results?search_query=" + query
+    print(search_url)
+    with urllib.request.urlopen(search_url) as response:
+        the_page = response.read()
+        soup = BeautifulSoup(the_page, "html.parser")
+        for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
+            url_final = 'https://www.youtube.com' + vid['href']
+            test = url_final.split()
+            url_list.append(test)
+            url = url_list[0][0]
+        print(url)
+        download_audio_from_youtube(url, track, playlist, artist)
 
 def download_audio_from_youtube(url, track, playlist, artist):
     home = expanduser('~\Desktop')
     path = home + '\\' + playlist.replace(' ', '_')
-    print(path)
+    print('Path to folder: ' + path)
     artist_ = str(artist).replace('/', '-')
     track_ = str(track).replace('/', '-')
     print("Downloading: " + artist_, track_)
     command = 'youtube-dl --newline --no-post-overwrites --no-playlist -x --audio-format mp3 --audio-quality 0 -o "'
     cmd = command + path + '\\' + track_ + '-' + artist_ + '.%(ext)s" ' + url
-    print(cmd)
+    # print(cmd)
 
     runCMD(cmd, 3)
 
 
 if __name__ == '__main__':
-    # if len(sys.argv) > 1:
-    #     uri = sys.argv[1]
-    # else:
-    #     print ("Whoops, need your username!")
-    #     print ("usage: python spotify.py [URI]")
-    #     sys.exit()
-    # print ("Parsing: " + uri)
+    if len(sys.argv) > 1:
+        uri = sys.argv[1]
+    else:
+        print("usage: python spotify.py [URI]")
+        sys.exit()
+    print("Parsing: " + uri)
 
-    uri = 'spotify:user:12144157524:playlist:4SUYNZGVFL7LxOUtBkjb7j'
+    # uri = 'spotify:user:12144157524:playlist:5z6oshhZ24pqDLOrleCbwp'
 
-    playlist_re = re.compile("spotify:user:[\w]+:playlist:[\w]+")
+    playlist_re = re.compile("spotify:user:[\w,.]+:playlist:[\w]+")
+    print(playlist_re)
     for playlist_uri in playlist_re.findall(uri):
         segments = playlist_uri.split(":")
-        print(segments)
+        # print(segments)
         user_id = segments[2]
-        print(user_id)
+        print('List owner: ' + user_id)
         playlist_id = segments[4]
-        print(playlist_id)
+        print('List ID: ' + playlist_id)
 
 
     token = SpotifyClientCredentials(client_id, client_secret)
