@@ -1,7 +1,6 @@
 import re
 import sys
 import subprocess
-import urllib.parse
 import spotipy
 import urllib.parse
 import urllib.request
@@ -9,10 +8,7 @@ from os.path import expanduser
 from bs4 import BeautifulSoup
 from spotipy.oauth2 import SpotifyClientCredentials
 
-
-client_id ='239f993e90b54895a1faebc8b6b2f485'
-client_secret ='e70808aa36e540c6b0dc545fbe4e5768'
-
+import credentials
 
 def runCMD(cmd, timeout=1):
     print ('CMD:', str(cmd))
@@ -66,17 +62,22 @@ def download_audio_from_youtube(url, track, playlist, artist):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        uri = sys.argv[1]
-    else:
-        print("usage: python spotify.py [URI]")
-        sys.exit()
-    print("Parsing: " + uri)
 
-    # uri = 'spotify:user:12144157524:playlist:5z6oshhZ24pqDLOrleCbwp'
+    DEBUG = True
+
+    if not DEBUG:
+        if len(sys.argv) > 1:
+            uri = sys.argv[1]
+        else:
+            print("usage: python spotify.py [URI]")
+            sys.exit()
+        print("Parsing: " + uri)
+
+    else:
+        uri = 'spotify:user:spotify:playlist:4hOKQuZbraPDIfaGbM3lKI'
 
     playlist_re = re.compile("spotify:user:[\w,.]+:playlist:[\w]+")
-    print(playlist_re)
+    # print(playlist_re)
     for playlist_uri in playlist_re.findall(uri):
         segments = playlist_uri.split(":")
         # print(segments)
@@ -85,8 +86,7 @@ if __name__ == '__main__':
         playlist_id = segments[4]
         print('List ID: ' + playlist_id)
 
-
-    token = SpotifyClientCredentials(client_id, client_secret)
+    token = SpotifyClientCredentials(credentials.client_id, credentials.client_secret)
     if token:
         sp = spotipy.Spotify(client_credentials_manager=token)
         playlist = sp.user_playlist(user_id, playlist_id, fields="tracks, next, name")
