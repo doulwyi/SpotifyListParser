@@ -2,63 +2,45 @@ import re
 import sys
 import subprocess
 import spotipy
-import urllib.parse
-import urllib.request
 from os.path import expanduser
-from bs4 import BeautifulSoup
 from spotipy.oauth2 import SpotifyClientCredentials
 
 import credentials
+
 
 def runCMD(cmd, timeout=1):
     print ('CMD:', str(cmd))
     return str(subprocess.run(cmd, stdout=subprocess.PIPE))
 
 
-
 def show_tracks(results, playlist):
     for i, item in enumerate(tracks['items']):
         track = item['track']
         track_name = track['name']
-        artist = track['artists'][0]['name']
-        show_youtube_url(track_name, playlist, artist)
+        artists = []
+        for j in range(0, len(track['artists'])):
+            artists.append(track['artists'][j]['name'])
+        youtube_dl(track_name, playlist, artists)
         # print("%d %2.32s / %s" % (i, artist, track_name))
 
 
-def show_youtube_url(track, playlist, artist):
-    url_list = []
-    _track = track.split('-')
-    print('Track name: ' + _track[0])
-    print('Artist name: ' + artist)
-    full_search = _track[0] + ' ' + artist + ' audio'
-    print('Key words for search: ' + full_search)
-    query = urllib.parse.quote(full_search)
-    # print(query)
-    search_url = "https://www.youtube.com/results?search_query=" + query
-    print(search_url)
-    with urllib.request.urlopen(search_url) as response:
-        the_page = response.read()
-        soup = BeautifulSoup(the_page, "html.parser")
-        for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
-            url_final = 'https://www.youtube.com' + vid['href']
-            test = url_final.split()
-            url_list.append(test)
-            url = url_list[0][0]
-        print(url)
-        download_audio_from_youtube(url, track, playlist, artist)
-
-def download_audio_from_youtube(url, track, playlist, artist):
-    home = expanduser('~\Desktop')
-    path = home + '\\' + playlist.replace(' ', '_')
+def youtube_dl(track, playlist, artists):
+    path = expanduser('~\Desktop') + '\\' + playlist
     print('Path to folder: ' + path)
-    artist_ = str(artist).replace('/', '-')
-    track_ = str(track).replace('/', '-')
-    print("Downloading: " + artist_, track_)
-    command = 'youtube-dl --newline --no-post-overwrites --no-playlist -x --audio-format mp3 --audio-quality 0 -o "'
-    cmd = command + path + '\\' + track_ + '-' + artist_ + '.%(ext)s" ' + url
-    # print(cmd)
+    # _track = re.split(r'[`\-=~!@#$%^&*()_+\[\]{};\'\\:"|<,./<>?]', track)
+    _track = re.split(r'[-(]', track)
+    print('Track name: ' + _track[0])
+    print('Artists name: ' + ', '.join(artists))
+    full_search = _track[0] + ' ' + ' '.join(artists)
+    print('Key words for search: ' + full_search)
 
-    runCMD(cmd, 3)
+    artist_ = ', '.join(artists)
+    track_ = str(track).replace('/', ' - ')
+    print("Downloading: " + artist_, track_)
+    command = 'youtube-dl --newline --no-post-overwrites --no-playlist -x --audio-format mp3 -i --audio-quality 0 "ytsearch1: ' + full_search + '" -o '
+    cmd = command + '"' + path + '\\' + track_ + ' - ' + artist_ + '.%(ext)s"'
+    # print(cmd)
+    runCMD(cmd, 1)
 
 
 if __name__ == '__main__':
@@ -74,7 +56,7 @@ if __name__ == '__main__':
         print("Parsing: " + uri)
 
     else:
-        uri = 'spotify:user:spotify:playlist:4hOKQuZbraPDIfaGbM3lKI'
+        uri = 'spotify:user:d.flucas:playlist:4Kls4WcczUw0Fj5XAx4Jbp'
 
     playlist_re = re.compile("spotify:user:[\w,.]+:playlist:[\w]+")
     # print(playlist_re)
