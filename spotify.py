@@ -21,13 +21,11 @@ def show_tracks(results, playlist):
         for j in range(0, len(track['artists'])):
             artists.append(track['artists'][j]['name'])
         youtube_dl(track_name, playlist, artists)
-        # print("%d %2.32s / %s" % (i, artist, track_name))
 
 
 def youtube_dl(track, playlist, artists):
     path = expanduser('~\Desktop') + '\\' + playlist
     print('Path to folder: ' + path)
-    # _track = re.split(r'[`\-=~!@#$%^&*()_+\[\]{};\'\\:"|<,./<>?]', track)
     _track = re.split(r'[-(]', track)
     print('Track name: ' + _track[0])
     print('Artists name: ' + ', '.join(artists))
@@ -39,7 +37,6 @@ def youtube_dl(track, playlist, artists):
     print("Downloading: " + artist_, track_)
     command = 'youtube-dl --newline --no-post-overwrites --no-playlist -x --audio-format mp3 -i --audio-quality 0 "ytsearch1: ' + full_search + '" -o '
     cmd = command + '"' + path + '\\' + track_ + ' - ' + artist_ + '.%(ext)s"'
-    # print(cmd)
     runCMD(cmd, 1)
 
 
@@ -59,10 +56,8 @@ if __name__ == '__main__':
         uri = 'spotify:user:d.flucas:playlist:4Kls4WcczUw0Fj5XAx4Jbp'
 
     playlist_re = re.compile("spotify:user:[\w,.]+:playlist:[\w]+")
-    # print(playlist_re)
     for playlist_uri in playlist_re.findall(uri):
         segments = playlist_uri.split(":")
-        # print(segments)
         user_id = segments[2]
         print('List owner: ' + user_id)
         playlist_id = segments[4]
