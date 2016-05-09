@@ -27,12 +27,12 @@ def youtube_dl(track, playlist, artists):
     path = expanduser('~\Desktop') + '\\' + playlist
     print('Path to folder: ' + path)
     _track = re.split(r'[-(]', track)
+    artist_ = ', '.join(artists)
     print('Track name: ' + _track[0])
-    print('Artists name: ' + ', '.join(artists))
-    full_search = _track[0] + ' ' + ' '.join(artists)
+    print('Artists name: ' + artist_)
+    full_search = _track[0] + ' ' + ' '.join(artists) + ' lyric video'
     print('Key words for search: ' + full_search)
 
-    artist_ = ', '.join(artists)
     track_ = str(track).replace('/', ' - ')
     print("Downloading: " + artist_, track_)
     command = 'youtube-dl --newline --no-post-overwrites --no-playlist -x --audio-format mp3 -i --audio-quality 0 "ytsearch1: ' + full_search + '" -o '
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         print("Parsing: " + uri)
 
     else:
-        uri = 'spotify:user:d.flucas:playlist:4Kls4WcczUw0Fj5XAx4Jbp'
+        uri = 'spotify:user:spotify:playlist:4hOKQuZbraPDIfaGbM3lKI'
 
     playlist_re = re.compile("spotify:user:[\w,.]+:playlist:[\w]+")
     for playlist_uri in playlist_re.findall(uri):
